@@ -9,6 +9,8 @@ import (
 func HelloHandlers(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodGet {
 		io.WriteString(w, "Hello World!")
+	} else {
+		http.Error(w, "ざまあ", http.StatusMethodNotAllowed)
 	}
 
 }
