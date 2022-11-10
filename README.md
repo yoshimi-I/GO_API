@@ -93,4 +93,11 @@ func HelloHandlers(w http.ResponseWriter, req *http.Request) {
 - 簡単に言うとパラメータの後ろに条件を付け加えるやつ
   - 条件一致の検索とかするあれです。
   - http://gaforum.jp/?s=gaiqみたいなやつです。
-  - 
+```go
+func (u *URL) Query() Values {
+v, _ := ParseQuery(u.RawQuery)
+return v
+}
+```
+- 基本的にはGOではハンドラーの中の*http.Requestのなかのurl.URLフィールドを用いる
+- その中のQueryメソッドを用いる
