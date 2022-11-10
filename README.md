@@ -3,6 +3,8 @@
 1. [ハンドラーの作成](#anchor1)
 2. [HTTPメソッド](#anchor2)
 3. [ステータスコード](#anchor3)
+4. [パスパラメータ](#anchor4)
+5. [クエリパラメータ](#anchor5)
 
 
 # 1. ハンドラーの作成 <a id="anchor1"></a>
@@ -61,3 +63,34 @@ func HelloHandlers(w http.ResponseWriter, req *http.Request) {
 		http.Error(w,"ざまあ,405です",http.StatusMethodNotAllowed)
 	}
 ```
+# 3. パスパラメータ <a id="anchor4"></a>
+- 簡単にいうとurlの後ろにつける変数
+  - hello/1とかhello/2とか全部ハンドラーを描くのはめんどくさいから変数にしたいよね
+  - このULRの中にあるIDをパラメータとして変数かしてハンドラの中で利用することを言う
+  ### main.go
+- ```go
+  import (
+	"github.com/gorilla/mux"
+  )
+  r.HandleFunc("/article/{id:[0-9]+}", handlers.ArticleDetalsHandler).Methods(http.MethodGet)
+  ```
+  ### handler.go
+  ```go
+    func ArticleDetalsHandler(w http.ResponseWriter, req *http.Request) {
+	articleID,err := strconv.Atoi(mux.Vars(req)["id"])
+	if err != nil{
+		http.Error(w,"パスパラメータがおかしい",http.StatusBadRequest)
+	}
+	resString := fmt.Sprintf("記事の番号は%dです", articleID)
+	io.WriteString(w, resString)
+  }
+  ```
+
+- idをstrconv.Atoi(mux.Vars(req)["id"])で受け取ってエラーハンドリングをする
+- Vars関数はmuxに実装されている関数であり、引数に辞書型をとってくれるため、そのkeyを["id"]のように指定することで取得可能
+- これをAtoiを用いてint型にキャスト
+# 4. クエリパラメータ <a id="anchor5"></a>
+- 簡単に言うとパラメータの後ろに条件を付け加えるやつ
+  - 条件一致の検索とかするあれです。
+  - http://gaforum.jp/?s=gaiqみたいなやつです。
+  - 

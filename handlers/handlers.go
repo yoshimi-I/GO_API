@@ -2,17 +2,14 @@ package handlers
 
 import (
 	"fmt"
+	"github.com/gorilla/mux"
 	"io"
 	"net/http"
+	"strconv"
 )
 
 func HelloHandlers(w http.ResponseWriter, req *http.Request) {
-	if req.Method == http.MethodGet {
-		io.WriteString(w, "Hello World!")
-	} else {
-		http.Error(w, "ざまあ", http.StatusMethodNotAllowed)
-	}
-
+	io.WriteString(w, "Hello World!")
 }
 
 func PostAriticleHandlers(w http.ResponseWriter, req *http.Request) {
@@ -24,7 +21,10 @@ func ArticleListsHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func ArticleDetalsHandler(w http.ResponseWriter, req *http.Request) {
-	articleID := 1
+	articleID, err := strconv.Atoi(mux.Vars(req)["id"])
+	if err != nil {
+		http.Error(w, "パスパラメータがおかしい", http.StatusBadRequest)
+	}
 	resString := fmt.Sprintf("記事の番号は%dです", articleID)
 	io.WriteString(w, resString)
 }

@@ -1,19 +1,21 @@
 package main
 
 import (
+	"github.com/gorilla/mux"
+	"github.com/yoshimi-I/GO_API/handlers"
 	"log"
 	"net/http"
-	"yoshimi-I/GO_API/handlers"
 )
 
 func main() {
-	http.HandleFunc("/hello", handlers.HelloHandlers)
-	http.HandleFunc("/article", handlers.PostAriticleHandlers)
-	http.HandleFunc("/article/list", handlers.ArticleListsHandler)
-	http.HandleFunc("/article/1", handlers.ArticleDetalsHandler)
-	http.HandleFunc("/article/nice", handlers.PostNiceHnadler)
-	http.HandleFunc("/article/comment", handlers.PostCommentHnadler)
+	r := mux.NewRouter()
+	r.HandleFunc("/hello", handlers.HelloHandlers).Methods(http.MethodGet)
+	r.HandleFunc("/article", handlers.PostAriticleHandlers)
+	r.HandleFunc("/article/list", handlers.ArticleListsHandler)
+	r.HandleFunc("/article/{id:[0-9]+}", handlers.ArticleDetalsHandler).Methods(http.MethodGet)
+	r.HandleFunc("/article/nice", handlers.PostNiceHnadler)
+	r.HandleFunc("/article/comment", handlers.PostCommentHnadler)
 
 	log.Println("サーバーを8080で立ち上げています")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":8080", r))
 }
