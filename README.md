@@ -1,13 +1,16 @@
 # Go言語のAPIチュートリアル
+- API周りで困った時に帰ってくるチートシートです。
+- 随時更新予定
 # 目次
-1. [ハンドラーの作成](#anchor1)
+1. [ハンドラー](#anchor1)
 2. [HTTPメソッド](#anchor2)
 3. [ステータスコード](#anchor3)
 4. [パスパラメータ](#anchor4)
 5. [クエリパラメータ](#anchor5)
+6. [GOでのjsonの扱い](#anchor6)
 
 
-# 1. ハンドラーの作成 <a id="anchor1"></a>
+# 1. ハンドラー <a id="anchor1"></a>
 - Goは簡単にローカルを立ち上げてハンドラーを作れる
 - ハンドラーとは簡単にいうと、urlのリクエストに応じたレスポンスを返すものである
 ```go
@@ -101,3 +104,61 @@ return v
 ```
 - 基本的にはGOではハンドラーの中の*http.Requestのなかのurl.URLフィールドを用いる
 - その中のQueryメソッドを用いる
+```go
+queryMap := req.URL.Query()
+
+	var page int
+	var err error
+	if p, ok := queryMap["page"]; ok && len(p) > 0 { //okは受け取れた場合tureがはいる
+		page, err = strconv.Atoi(p[0])
+		if err != nil {
+			http.Error(w, "クエリがおかしい", http.StatusBadRequest)
+			return
+		}
+	} else {
+		page = 1
+	}
+	resString := fmt.Sprintf("記事番号は%dです", page)
+	io.WriteString(w, resString)
+```
+### 解説
+```go
+p, ok := queryMap["page"]
+```
+- ここで簡単に言うとpageとついたmapを第一引数,取得できたかどうかをtrueまたはfalseで第二引数に受け取ることができる。
+
+# 1. Goでのjsonの扱い <a id="anchor6"></a>
+- 基本APIのレスポンスはjsonの形なので、GOでのjsonの扱いをまとめる。
+- 基本GetならそのままGetしたい内容を,postならpostした内容をjsonとして受け取りたい
+### 流れ
+1. 例えば今回であればコメントの投稿を行いたいとする
+   - まずはコメントが保持する情報を構造体として作成する。
+   - これがそのままDBに保存されるので、それを想定して作っていきたい。
+  ```go
+  type Commet struct{
+    CommentID int
+    ArticleID int
+    Message int
+    CreatedAt time.Time
+  }
+  ```
+2. 次に構造体を引数にjsonに変換するjson.Marshalを用いて変換する。
+   - 以下を用いることで、構造体をjsonに変換可能
+  ```go
+  import (
+      "encoding/json"
+  )
+
+jsonData,err := json.Marshal(ここに構造体を入れる)
+  ```
+- これは[]byte型で帰ってくるので注意
+3. ただこのままだと,jsonのキーがそのまま構造体のキーと同じになってしまっているのでここを帰る必要があるんです
+   - Goはキャメル,jsonはスネークケースなので
+  ```go
+    type Commet struct {
+CommentID int       `json:"comment_id"`
+ArticleID int       `json:"article_id"`
+Message   string    `json:"message"`
+CreatedAt time.Time `json:"created_at"`
+}
+  ```
